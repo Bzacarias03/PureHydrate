@@ -10,9 +10,9 @@ public class LocalAppData extends AppCompatActivity {
 
     private final static String SHARED_PREFS = "Shared_Prefs";
 
-    private final static String ACCEPTED = "Accepted";
-    private final static String NEXT_TIME = "Next_Time";
-    private final static String FIRST_TIME_INIT = "First_Time_Init";
+    private static final String ACCEPTED = "Accepted";
+    private static final String EXCESS_TIME = "Excess_Time";
+    private static final String FIRST_TIME_INIT = "First_Time_Init";
 
     public static boolean accepted;
     public static boolean firstTimeInit;
@@ -23,7 +23,7 @@ public class LocalAppData extends AppCompatActivity {
         SharedPreferences.Editor editor = preferences.edit();
         editor.putBoolean(ACCEPTED, accepted);
         editor.putBoolean(FIRST_TIME_INIT, firstTimeInit);
-        editor.putLong(NEXT_TIME, excessTime);
+        editor.putLong(EXCESS_TIME, excessTime);
         editor.apply();
     }
 
@@ -31,7 +31,7 @@ public class LocalAppData extends AppCompatActivity {
         SharedPreferences preferences = context.getSharedPreferences(SHARED_PREFS, Context.MODE_PRIVATE);
         accepted = preferences.getBoolean(ACCEPTED, false);
         firstTimeInit = preferences.getBoolean(FIRST_TIME_INIT, false);
-        excessTime = preferences.getLong(NEXT_TIME, 0);
+        excessTime = preferences.getLong(EXCESS_TIME, 0);
     }
 
     public static boolean serviceRunning(Context context) {

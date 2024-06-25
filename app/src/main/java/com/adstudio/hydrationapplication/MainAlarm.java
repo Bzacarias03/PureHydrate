@@ -24,7 +24,7 @@ public class MainAlarm {
             cancelAlarm(context);
         }
         manager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        intent.putExtra("notification", "alarm");
+        intent.putExtra("notification", "onTime");
         pendingIntent = PendingIntent.getBroadcast(
                 context,
                 ALARM_REQUEST_CODE,

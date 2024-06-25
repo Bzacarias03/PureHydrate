@@ -15,16 +15,17 @@ public class MainReceiver extends BroadcastReceiver {
             case "update":
                 MainForegroundService.updateNotification(context);
                 break;
-            case "alarm":
+            case "onTime":
                 MainForegroundService.onTimeWater(context);
                 break;
             case "excess":
-                LocalAppData.excessTime = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(30);
                 MainForegroundService.onTimeWater(context);
+                LocalAppData.excessTime = System.currentTimeMillis() + TimeUnit.HOURS.toMillis(MainForegroundService.EXCESS_TIME);
                 break;
             case "stop":
                 Intent it = new Intent(context, MainForegroundService.class);
                 MainForegroundService.stopService(context, it);
+                break;
         }
     }
 }

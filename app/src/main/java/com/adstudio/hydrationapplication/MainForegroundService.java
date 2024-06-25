@@ -26,15 +26,16 @@ public class MainForegroundService extends Service {
     private static PendingIntent receiverIntent;
     private static PendingIntent stopIntent;
     private static Date date;
-    private Context context;
 
     private static final String CHANNELID = "ChannelID";
     private static final int FOREGROUND_NOTIFICATION_ID = 2;
     private static final int ACTIVITY_ID = 1;
     private static final int UPDATE_NOTIF_ID = 5;
     private static final int STOP_SERVICE_ID = 10;
-    public static final int NEXT_DRINK = 2;
-    public static final int EXCESS_TIME = 8;
+    public static final int UPDATE_AFTER_EXCESS = 150;
+    public static final int NEXT_DRINK = 85;
+    public static final int EXCESS_TIME = 7;
+
     public static Random random = new Random();
 
     public static String[] messages = {
@@ -52,7 +53,7 @@ public class MainForegroundService extends Service {
     @SuppressLint("ForegroundServiceType")
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        context = getApplicationContext();
+        Context context = getApplicationContext();
 
         notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         activityIntent = createActivityIntent(context);
@@ -60,8 +61,8 @@ public class MainForegroundService extends Service {
         stopIntent = stopServiceIntent(context);
 
         date = new Date(System.currentTimeMillis());
-        date.setTime(date.getTime() + TimeUnit.HOURS.toMillis(NEXT_DRINK));
-        LocalAppData.excessTime = date.getTime() + TimeUnit.HOURS.toMillis(EXCESS_TIME);
+        date.setTime(date.getTime() + TimeUnit.MINUTES.toMillis(NEXT_DRINK));
+        LocalAppData.excessTime = System.currentTimeMillis() + TimeUnit.HOURS.toMillis(EXCESS_TIME);
         LocalAppData.saveData(context);
 
         startForeground(FOREGROUND_NOTIFICATION_ID, buildNotification(date.getTime(), context));
@@ -69,7 +70,6 @@ public class MainForegroundService extends Service {
     }
 
     private static Notification buildNotification(long time, Context context) {
-        MainAlarm.setOnTimeAlarm(time, context);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(
                     CHANNELID,
@@ -106,11 +106,12 @@ public class MainForegroundService extends Service {
         builder.setAutoCancel(true);
         builder.setOngoing(false);
 
+        MainAlarm.setOnTimeAlarm(time, context);
         return builder.build();
     }
 
     public static void updateNotification(Context context) {
-        date.setTime(date.getTime() + TimeUnit.HOURS.toMillis(NEXT_DRINK));
+        date.setTime(date.getTime() + TimeUnit.MINUTES.toMillis(NEXT_DRINK));
         if(date.getTime() >= LocalAppData.excessTime) {
             excessWater(context);
             return;
@@ -142,8 +143,8 @@ public class MainForegroundService extends Service {
         excessNotification.setAutoCancel(true);
         excessNotification.setOngoing(false);
 
+        MainAlarm.setExcessAlarm((System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(UPDATE_AFTER_EXCESS)), context);
         notificationManager.notify(FOREGROUND_NOTIFICATION_ID, excessNotification.build());
-        MainAlarm.setExcessAlarm(LocalAppData.excessTime, context);
     }
 
     public static void onTimeWater(Context context) {
@@ -176,6 +177,9 @@ public class MainForegroundService extends Service {
         onTimeNotification.setAutoCancel(true);
         onTimeNotification.setOngoing(false);
 
+        date.setTime(System.currentTimeMillis());
+        LocalAppData.excessTime = System.currentTimeMillis() + TimeUnit.HOURS.toMillis(EXCESS_TIME);
+        LocalAppData.saveData(context);
         notificationManager.notify(FOREGROUND_NOTIFICATION_ID, onTimeNotification.build());
     }
 
